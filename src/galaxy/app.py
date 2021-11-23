@@ -139,8 +139,12 @@ class Mapathon:
     """Class for mapathon detail report and summary report this is the class that self connects to database and provide you summary and detail report."""
 
     # constructor
-    def __init__(self, parameters):
-        self.database = Database(dict(config.items("INSIGHTS_PG")))
+    def __init__(self, parameters,source=None):
+        if source == "underpass":
+            self.database = Database(dict(config.items("UNDERPASS")))
+        else:
+            self.database = Database(dict(config.items("INSIGHTS_PG")))
+        self.source=source
         self.con, self.cur = self.database.connect()
         # parameter validation using pydantic model
         if type(parameters) is MapathonRequestParams:
@@ -151,23 +155,25 @@ class Mapathon:
     # Mapathon class instance method
     def get_summary(self):
         """Function to get summary of your mapathon event """
-
-        changeset_query, hashtag_filter, timestamp_filter = create_changeset_query(
-            self.params, self.con, self.cur)
-        osm_history_query = create_osm_history_query(changeset_query,
-                                                     with_username=False)
-        # print(osm_history_query)
+        if self.source == "underpass":
+            osm_history_query,total_contributor_query=generate_mapathon_summary_underpass_query(self.params,self.cur)
+        else:
+            changeset_query, hashtag_filter, timestamp_filter = create_changeset_query(
+                self.params, self.con, self.cur)
+            osm_history_query = create_osm_history_query(changeset_query,
+                                                        with_username=False)
+            total_contributor_query = f"""
+                    SELECT COUNT(distinct user_id) as contributors_count
+                    FROM osm_changeset
+                    WHERE {timestamp_filter} AND ({hashtag_filter})
+                """
+        # print(total_contributor_query)
         result = self.database.executequery(osm_history_query)
         mapped_features = [MappedFeature(**r) for r in result]
-        total_contributor_query = f"""
-                SELECT COUNT(distinct user_id) as contributors_count
-                FROM osm_changeset
-                WHERE {timestamp_filter} AND ({hashtag_filter})
-            """
-        print(total_contributor_query)
-
         total_contributors = self.database.executequery(
             total_contributor_query)
+        print(total_contributors)
+        
         report = MapathonSummary(total_contributors=total_contributors[0].get(
             "contributors_count", "None"),
             mapped_features=mapped_features)

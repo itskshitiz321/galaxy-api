@@ -121,7 +121,7 @@ def test_mapathon_total_contributor_mapathon_query_builder():
                 FROM osm_changeset
                 WHERE {timestamp_filter} AND ({hashtag_filter})
             """
-    # print(result_total_contributor_query.encode('utf-8'))
+    # print(result_total_contributor_query)
     
     assert result_total_contributor_query == default_total_contributor_query
 
@@ -132,7 +132,7 @@ def test_mapathon_users_contributors_mapathon_query_builder():
                                                        cur)
     result_users_contributors_query = mapathon_query_builder.create_users_contributions_query(
             params, changeset_query)
-    print(result_users_contributors_query.encode('utf-8'))
+    # print(result_users_contributors_query.encode('utf-8'))
     assert result_users_contributors_query == default_users_contributors_query
 
 
