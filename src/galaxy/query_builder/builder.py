@@ -330,11 +330,19 @@ def generate_mapathon_summary_underpass_query(params,cur):
         hashtags.append(str(p)) 
     hashtagfilter=create_hashtagfilter_underpass(hashtags,"hashtags")
     timestamp_filter=create_timestamp_filter_query(params.from_timestamp, params.to_timestamp,cur)
-
+   
+    if hashtagfilter == '' : 
+        hashtag_projectid_filter=projectidfilter
+    elif projectidfilter == '' :
+        hashtag_projectid_filter=hashtagfilter
+    else:
+        hashtag_projectid_filter = [hashtagfilter, projectidfilter]
+        hashtag_projectid_filter=" OR ".join(hashtag_projectid_filter)
+   
     summary_query= f"""with t1 as (
         select  *
         from changesets
-        where  ({timestamp_filter}) AND ({projectidfilter} OR {hashtagfilter})
+        where  ({timestamp_filter}) AND ({hashtag_projectid_filter})
         ),
         t2 as (
         select (each(added)).key as feature , (each(added)).value::Integer as count, 'create'::text as action
@@ -349,7 +357,7 @@ def generate_mapathon_summary_underpass_query(params,cur):
         order by count desc """
     total_contributor_query= f"""select  COUNT(distinct user_id) as contributors_count
         from changesets
-        where  ({timestamp_filter}) AND ({projectidfilter} OR {hashtagfilter})
+        where  ({timestamp_filter}) AND ({hashtag_projectid_filter})
         """
     # print(summary_query)
     # print("\n")
