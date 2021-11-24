@@ -40,6 +40,9 @@ def get_mapathon_detailed_report(params: MapathonRequestParams,
 
 @router.post("/summary", response_model=MapathonSummary)
 def get_mapathon_summary(params: MapathonRequestParams):
-   
-    mapathon = Mapathon(params)
+    print(params)
+    if params.source == "underpass":
+        mapathon = Mapathon(params,"underpass")
+    else:
+        mapathon = Mapathon(params)
     return mapathon.get_summary()

@@ -172,7 +172,7 @@ class Mapathon:
         mapped_features = [MappedFeature(**r) for r in result]
         total_contributors = self.database.executequery(
             total_contributor_query)
-        print(total_contributors)
+        print(osm_history_query)
         
         report = MapathonSummary(total_contributors=total_contributors[0].get(
             "contributors_count", "None"),

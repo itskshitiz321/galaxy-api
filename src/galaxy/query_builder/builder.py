@@ -325,15 +325,10 @@ def generate_mapathon_summary_underpass_query(params,cur):
         change_ids.append(projectid_hashtag_add_on+str(p)) 
 
     projectidfilter=create_hashtagfilter_underpass(change_ids,"hashtags")
-
     hashtags=[]
-    
     for p in params.hashtags:
         hashtags.append(str(p)) 
-    print(hashtags)
-
     hashtagfilter=create_hashtagfilter_underpass(hashtags,"hashtags")
-    print(hashtagfilter)
     timestamp_filter=create_timestamp_filter_query(params.from_timestamp, params.to_timestamp,cur)
 
     summary_query= f"""with t1 as (
@@ -356,10 +351,10 @@ def generate_mapathon_summary_underpass_query(params,cur):
         from changesets
         where  ({timestamp_filter}) AND ({projectidfilter} OR {hashtagfilter})
         """
-    print(summary_query)
-    print("\n")
+    # print(summary_query)
+    # print("\n")
 
-    print(total_contributor_query)
+    # print(total_contributor_query)
     
     return summary_query,total_contributor_query
 
